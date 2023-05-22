@@ -1,0 +1,631 @@
+Name: Vedansh Jaiswal
+Roll no.:67
+====================================================
+alter user sh identified by sh account unlock  ;
+select * from tab;
+
+SQL> select * from tab;
+
+TNAME                          TABTYPE  CLUSTERID
+------------------------------ ------- ----------
+CAL_MONTH_SALES_MV             TABLE
+CHANNELS                       TABLE
+COSTS                          TABLE
+COUNTRIES                      TABLE
+CUSTOMERS                      TABLE
+DIMENSION_EXCEPTIONS           TABLE
+DR$SUP_TEXT_IDX$I              TABLE
+DR$SUP_TEXT_IDX$K              TABLE
+DR$SUP_TEXT_IDX$N              TABLE
+DR$SUP_TEXT_IDX$R              TABLE
+FWEEK_PSCAT_SALES_MV           TABLE
+
+TNAME                          TABTYPE  CLUSTERID
+------------------------------ ------- ----------
+PRODUCTS                       TABLE
+PROFITS                        VIEW
+PROMOTIONS                     TABLE
+SALES                          TABLE
+SALES_TRANSACTIONS_EXT         TABLE
+SUPPLEMENTARY_DEMOGRAPHICS     TABLE
+TIMES                          TABLE
+
+18 rows selected.
+
+select count(*) from sales;
+
+*** Roll up 
+
+SELECT … GROUP BY ROLLUP (grouping_column_reference_list)
+
+
+
+
+SELECT channels.channel_desc, calendar_month_desc,
+countries.country_iso_code,
+TO_CHAR(SUM(amount_sold),'9,999,999,999') SALES$
+FROM sales, customers, times, channels, countries
+WHERE sales.time_id=times.time_id
+AND sales.cust_id=customers.cust_id
+AND customers.country_id = countries.country_id
+AND sales.channel_id = channels.channel_id
+AND channels.channel_desc IN ('Direct Sales' , 'Internet')
+AND times.calendar_month_desc IN ('2000-09','2000-10')
+AND countries.country_iso_code IN ('GB' ,'US')
+GROUP BY ROLLUP(channels.channel_desc, calendar_month_desc,
+countries.country_iso_code);
+
+
+
+
+SQL> SELECT channels.channel_desc, calendar_month_desc,
+  2  countries.country_iso_code,
+  3  TO_CHAR(SUM(amount_sold),'9,999,999,999') SALES$
+  4  FROM sales, customers, times, channels, countries
+  5  WHERE sales.time_id=times.time_id
+  6  AND sales.cust_id=customers.cust_id
+  7  AND customers.country_id = countries.country_id
+  8  AND sales.channel_id = channels.channel_id
+  9  AND channels.channel_desc IN ('Direct Sales' , 'Internet')
+ 10  AND times.calendar_month_desc IN ('2000-09','2000-10')
+ 11  AND countries.country_iso_code IN ('GB' ,'US')
+ 12  GROUP BY ROLLUP(channels.channel_desc, calendar_month_desc,
+ 13  countries.country_iso_code);
+
+CHANNEL_DESC         CALENDAR CO SALES$
+-------------------- -------- -- --------------
+Internet             2000-09  GB         16,569
+Internet             2000-09  US        124,224
+Internet             2000-09            140,793
+Internet             2000-10  GB         14,539
+Internet             2000-10  US        137,054
+Internet             2000-10            151,593
+Internet                                292,387
+Direct Sales         2000-09  GB         85,223
+Direct Sales         2000-09  US        638,201
+Direct Sales         2000-09            723,424
+Direct Sales         2000-10  GB         91,925
+
+CHANNEL_DESC         CALENDAR CO SALES$
+-------------------- -------- -- --------------
+Direct Sales         2000-10  US        682,297
+Direct Sales         2000-10            774,222
+Direct Sales                          1,497,646
+                                      1,790,032
+
+15 rows selected.
+
+
+
+SELECT channels.channel_desc, calendar_month_desc,
+countries.country_iso_code,
+TO_CHAR(SUM(amount_sold),'9,999,999,999') SALES$
+FROM sales, customers, times, channels, countries
+WHERE sales.time_id=times.time_id
+AND sales.cust_id=customers.cust_id
+AND customers.country_id = countries.country_id
+AND sales.channel_id = channels.channel_id
+AND channels.channel_desc IN ('Direct Sales' , 'Internet')
+AND times.calendar_month_desc IN ('2000-09','2000-10')
+AND countries.country_iso_code IN ('GB' ,'US')
+GROUP BY CUBE(channels.channel_desc, calendar_month_desc,
+countries.country_iso_code);
+
+
+
+
+SQL> SELECT channels.channel_desc, calendar_month_desc,
+  2  countries.country_iso_code,
+  3  TO_CHAR(SUM(amount_sold),'9,999,999,999') SALES$
+  4  FROM sales, customers, times, channels, countries
+  5  WHERE sales.time_id=times.time_id
+  6  AND sales.cust_id=customers.cust_id
+  7  AND customers.country_id = countries.country_id
+  8  AND sales.channel_id = channels.channel_id
+  9  AND channels.channel_desc IN ('Direct Sales' , 'Internet')
+ 10  AND times.calendar_month_desc IN ('2000-09','2000-10')
+ 11  AND countries.country_iso_code IN ('GB' ,'US')
+ 12  GROUP BY CUBE(channels.channel_desc, calendar_month_desc,
+ 13  countries.country_iso_code);
+
+CHANNEL_DESC         CALENDAR CO SALES$
+-------------------- -------- -- --------------
+                                      1,790,032
+                              GB        208,257
+                              US      1,581,775
+                     2000-09            864,217
+                     2000-09  GB        101,792
+                     2000-09  US        762,425
+                     2000-10            925,815
+                     2000-10  GB        106,465
+                     2000-10  US        819,351
+Internet                                292,387
+Internet                      GB         31,109
+
+CHANNEL_DESC         CALENDAR CO SALES$
+-------------------- -------- -- --------------
+Internet                      US        261,278
+Internet             2000-09            140,793
+Internet             2000-09  GB         16,569
+Internet             2000-09  US        124,224
+Internet             2000-10            151,593
+Internet             2000-10  GB         14,539
+Internet             2000-10  US        137,054
+Direct Sales                          1,497,646
+Direct Sales                  GB        177,148
+Direct Sales                  US      1,320,497
+Direct Sales         2000-09            723,424
+
+CHANNEL_DESC         CALENDAR CO SALES$
+-------------------- -------- -- --------------
+Direct Sales         2000-09  GB         85,223
+Direct Sales         2000-09  US        638,201
+Direct Sales         2000-10            774,222
+Direct Sales         2000-10  GB         91,925
+Direct Sales         2000-10  US        682,297
+
+27 rows selected.
+
+SQL>
+control panel<<services<<local<<oracle<<manual
+========================================================================================================================
+3.Find the total sales by country_iso and channel_desc for the US and France through the
+Internet and direct sales in September 2000
+
+
+SELECT channels.channel_desc, calendar_month_desc,
+countries.country_iso_code,
+TO_CHAR(SUM(amount_sold),'9,999,999,999') SALES$
+FROM sales, customers, times, channels, countries
+WHERE sales.time_id=times.time_id
+AND sales.cust_id=customers.cust_id
+AND customers.country_id = countries.country_id
+AND sales.channel_id = channels.channel_id
+AND channels.channel_desc IN ('Direct Sales' , 'Internet')
+AND times.calendar_month_desc IN ('2000-09')
+AND countries.country_iso_code IN ('FR')
+GROUP BY CUBE(channels.channel_desc, calendar_month_desc,
+countries.country_iso_code);
+
+SQL> SELECT channels.channel_desc, calendar_month_desc,
+  2  countries.country_iso_code,
+  3  TO_CHAR(SUM(amount_sold),'9,999,999,999') SALES$
+  4  FROM sales, customers, times, channels, countries
+  5  WHERE sales.time_id=times.time_id
+  6  AND sales.cust_id=customers.cust_id
+  7  AND customers.country_id = countries.country_id
+  8  AND sales.channel_id = channels.channel_id
+  9  AND channels.channel_desc IN ('Direct Sales' , 'Internet')
+ 10  AND times.calendar_month_desc IN ('2000-09')
+ 11  AND countries.country_iso_code IN ('FR')
+ 12  GROUP BY CUBE(channels.channel_desc, calendar_month_desc,
+ 13  countries.country_iso_code);
+
+CHANNEL_DESC         CALENDAR CO SALES$
+-------------------- -------- -- --------------
+                                         70,799
+                              FR         70,799
+                     2000-09             70,799
+                     2000-09  FR         70,799
+Internet                                  9,597
+Internet                      FR          9,597
+Internet             2000-09              9,597
+Internet             2000-09  FR          9,597
+Direct Sales                             61,202
+Direct Sales                  FR         61,202
+Direct Sales         2000-09             61,202
+
+CHANNEL_DESC         CALENDAR CO SALES$
+-------------------- -------- -- --------------
+Direct Sales         2000-09  FR         61,202
+
+12 rows selected.
+
+============================================================================
+Q4. Find the total sales by country_iso and channel_desc for the US and GB through the
+Internet and direct sales in September 2000 and October 2009 using PARTIAL ROLL-UP. The
+query should return the following:
+ Regular aggregation rows that would be produced by GROUP BY without
+using ROLLUP.
+ First-level subtotals aggregating across country_iso for each combination
+of channel_desc and calendar_month_desc.
+ Second-level subtotals aggregating across calendar_month_desc and country_iso for
+each channel_desc value.
+ It does not produce a grand total row.
+
+
+SELECT channels.channel_desc, calendar_month_desc,
+countries.country_iso_code,
+TO_CHAR(SUM(amount_sold),'9,999,999,999') SALES$
+FROM sales, customers, times, channels, countries
+WHERE sales.time_id=times.time_id
+AND sales.cust_id=customers.cust_id
+AND customers.country_id = countries.country_id
+AND sales.channel_id = channels.channel_id
+AND channels.channel_desc IN ('Direct Sales' , 'Internet')
+AND times.calendar_month_desc IN ('2000-09','2000-10')
+AND countries.country_iso_code IN ('GB' ,'US')
+GROUP BY channels.channel_desc,cube(calendar_month_desc,
+countries.country_iso_code);
+
+
+
+SQL> SELECT channels.channel_desc, calendar_month_desc,
+  2  countries.country_iso_code,
+  3  TO_CHAR(SUM(amount_sold),'9,999,999,999') SALES$
+  4  FROM sales, customers, times, channels, countries
+  5  WHERE sales.time_id=times.time_id
+  6  AND sales.cust_id=customers.cust_id
+  7  AND customers.country_id = countries.country_id
+  8  AND sales.channel_id = channels.channel_id
+  9  AND channels.channel_desc IN ('Direct Sales' , 'Internet')
+ 10  AND times.calendar_month_desc IN ('2000-09','2000-10')
+ 11  AND countries.country_iso_code IN ('GB' ,'US')
+ 12  GROUP BY channels.channel_desc,ROLLUP(calendar_month_desc,
+ 13  countries.country_iso_code);
+
+CHANNEL_DESC         CALENDAR CO SALES$
+-------------------- -------- -- --------------
+Internet             2000-09  GB         16,569
+Internet             2000-09  US        124,224
+Internet             2000-09            140,793
+Internet             2000-10  GB         14,539
+Internet             2000-10  US        137,054
+Internet             2000-10            151,593
+Internet                                292,387
+Direct Sales         2000-09  GB         85,223
+Direct Sales         2000-09  US        638,201
+Direct Sales         2000-09            723,424
+Direct Sales         2000-10  GB         91,925
+
+CHANNEL_DESC         CALENDAR CO SALES$
+-------------------- -------- -- --------------
+Direct Sales         2000-10  US        682,297
+Direct Sales         2000-10            774,222
+Direct Sales                          1,497,646
+
+14 rows selected.
+
+SQL>
+
+========================================================================================================
+Q5. Find the total sales by country_id and channel_desc for the US and GB through the Internet
+and direct sales in September 2000 and October 2009 using PARTIAL CUBE aggregation on
+month and country code and GROUP BY on channel_desc.
+
+
+SELECT channels.channel_desc, calendar_month_desc,
+countries.country_iso_code,
+TO_CHAR(SUM(amount_sold),'9,999,999,999') SALES$
+FROM sales, customers, times, channels, countries
+WHERE sales.time_id=times.time_id
+AND sales.cust_id=customers.cust_id
+AND customers.country_id = countries.country_id
+AND sales.channel_id = channels.channel_id
+AND channels.channel_desc IN ('Direct Sales' , 'Internet')
+AND times.calendar_month_desc IN ('2000-09','2000-10')
+AND countries.country_iso_code IN ('GB' ,'US')
+GROUP BY channels.channel_desc,cube(calendar_month_desc,
+countries.country_iso_code);
+
+SQL> SELECT channels.channel_desc, calendar_month_desc,
+  2  countries.country_iso_code,
+  3  TO_CHAR(SUM(amount_sold),'9,999,999,999') SALES$
+  4  FROM sales, customers, times, channels, countries
+  5  WHERE sales.time_id=times.time_id
+  6  AND sales.cust_id=customers.cust_id
+  7  AND customers.country_id = countries.country_id
+  8  AND sales.channel_id = channels.channel_id
+  9  AND channels.channel_desc IN ('Direct Sales' , 'Internet')
+ 10  AND times.calendar_month_desc IN ('2000-09','2000-10')
+ 11  AND countries.country_iso_code IN ('GB' ,'US')
+ 12  GROUP BY channels.channel_desc,cube(calendar_month_desc,
+ 13  countries.country_iso_code);
+
+CHANNEL_DESC         CALENDAR CO SALES$
+-------------------- -------- -- --------------
+Internet                                292,387
+Internet                      GB         31,109
+Internet                      US        261,278
+Internet             2000-09            140,793
+Internet             2000-09  GB         16,569
+Internet             2000-09  US        124,224
+Internet             2000-10            151,593
+Internet             2000-10  GB         14,539
+Internet             2000-10  US        137,054
+Direct Sales                          1,497,646
+Direct Sales                  GB        177,148
+
+CHANNEL_DESC         CALENDAR CO SALES$
+-------------------- -------- -- --------------
+Direct Sales                  US      1,320,497
+Direct Sales         2000-09            723,424
+Direct Sales         2000-09  GB         85,223
+Direct Sales         2000-09  US        638,201
+Direct Sales         2000-10            774,222
+Direct Sales         2000-10  GB         91,925
+Direct Sales         2000-10  US        682,297
+
+18 rows selected.
+
+SQL>
+===============================================================================
+Q6. Use GROUPING to create a set of mask columns for the result set of Q1.
+ Create grouping on channel_desc and name it as CH
+ Create grouping calendar_month_desc and name it as MO
+ Create grouping on country_iso_code and name it as CO
+
+
+SELECT channel_desc, calendar_month_desc, country_iso_code,
+TO_CHAR(SUM(amount_sold), '9,999,999,999') SALES$, GROUPING(channel_desc) AS
+Ch,
+GROUPING(calendar_month_desc) AS Mo, GROUPING(country_iso_code) AS Co
+FROM sales, customers, times, channels, countries
+WHERE sales.time_id=times.time_id
+AND sales.cust_id=customers.cust_id
+AND customers.country_id = countries.country_id
+AND sales.channel_id= channels.channel_id
+AND channels.channel_desc IN ('Direct Sales', 'Internet')
+AND times.calendar_month_desc IN ('2000-09','2000-10')
+AND countries.country_iso_code IN ('GB', 'US')
+GROUP BY ROLLUP(channel_desc, calendar_month_desc,
+countries.country_iso_code);
+
+SQL> SELECT channel_desc, calendar_month_desc, country_iso_code,
+  2  TO_CHAR(SUM(amount_sold), '9,999,999,999') SALES$, GROUPING(channel_desc) AS
+  3  Ch,
+  4  GROUPING(calendar_month_desc) AS Mo, GROUPING(country_iso_code) AS Co
+  5  FROM sales, customers, times, channels, countries
+  6  WHERE sales.time_id=times.time_id
+  7  AND sales.cust_id=customers.cust_id
+  8  AND customers.country_id = countries.country_id
+  9  AND sales.channel_id= channels.channel_id
+ 10  AND channels.channel_desc IN ('Direct Sales', 'Internet')
+ 11  AND times.calendar_month_desc IN ('2000-09','2000-10')
+ 12  AND countries.country_iso_code IN ('GB', 'US')
+ 13  GROUP BY ROLLUP(channel_desc, calendar_month_desc,
+ 14  countries.country_iso_code);
+
+CHANNEL_DESC         CALENDAR CO SALES$                 CH         MO         CO
+-------------------- -------- -- -------------- ---------- ---------- ----------
+Internet             2000-09  GB         16,569          0          0          0
+Internet             2000-09  US        124,224          0          0          0
+Internet             2000-09            140,793          0          0          1
+Internet             2000-10  GB         14,539          0          0          0
+Internet             2000-10  US        137,054          0          0          0
+Internet             2000-10            151,593          0          0          1
+Internet                                292,387          0          1          1
+Direct Sales         2000-09  GB         85,223          0          0          0
+Direct Sales         2000-09  US        638,201          0          0          0
+Direct Sales         2000-09            723,424          0          0          1
+Direct Sales         2000-10  GB         91,925          0          0          0
+
+CHANNEL_DESC         CALENDAR CO SALES$                 CH         MO         CO
+-------------------- -------- -- -------------- ---------- ---------- ----------
+Direct Sales         2000-10  US        682,297          0          0          0
+Direct Sales         2000-10            774,222          0          0          1
+Direct Sales                          1,497,646          0          1          1
+                                      1,790,032          1          1          1
+
+15 rows selected.
+
+SQL>
+==========================================================================================
+Q7.  Find the total sales by country_id and channel_desc for the US and GB through the
+Internet and direct sales in September 2000 and October 2009 using GROUPING SETS.
+Calculate aggregates over three groupings:
+ (channel_desc, calendar_month_desc, country_iso_code)
+ (channel_desc, country_iso_code)
+ (calendar_month_desc, country_iso_code)
+
+
+
+SELECT channel_desc, calendar_month_desc, country_iso_code,
+TO_CHAR(SUM(amount_sold), '9,999,999,999') SALES$, GROUPING(channel_desc) AS
+Ch,
+GROUPING(calendar_month_desc) AS Mo, GROUPING(country_iso_code) AS Co
+FROM sales, customers, times, channels, countries
+WHERE sales.time_id=times.time_id
+AND sales.cust_id=customers.cust_id
+AND customers.country_id = countries.country_id
+AND sales.channel_id= channels.channel_id
+AND channels.channel_desc IN ('Direct Sales', 'Internet')
+AND times.calendar_month_desc IN ('2000-09','2000-10')
+AND countries.country_iso_code IN ('GB', 'US')
+GROUP BY grouping sets(channel_desc, calendar_month_desc,
+countries.country_iso_code),(channel_desc, country_iso_code),(calendar_month_desc, country_iso_code);
+
+SQL> SELECT channel_desc, calendar_month_desc, country_iso_code,
+  2  TO_CHAR(SUM(amount_sold), '9,999,999,999') SALES$, GROUPING(channel_desc) AS
+  3  Ch,
+  4  GROUPING(calendar_month_desc) AS Mo, GROUPING(country_iso_code) AS Co
+  5  FROM sales, customers, times, channels, countries
+  6  WHERE sales.time_id=times.time_id
+  7  AND sales.cust_id=customers.cust_id
+  8  AND customers.country_id = countries.country_id
+  9  AND sales.channel_id= channels.channel_id
+ 10  AND channels.channel_desc IN ('Direct Sales', 'Internet')
+ 11  AND times.calendar_month_desc IN ('2000-09','2000-10')
+ 12  AND countries.country_iso_code IN ('GB', 'US')
+ 13  GROUP BY grouping sets(channel_desc, calendar_month_desc,
+ 14  countries.country_iso_code),(channel_desc, country_iso_code),(calendar_month_desc, country_iso_code);
+
+CHANNEL_DESC         CALENDAR CO SALES$                 CH         MO         CO
+-------------------- -------- -- -------------- ---------- ---------- ----------
+Internet             2000-09  GB         16,569          0          0          0
+Direct Sales         2000-10  US        682,297          0          0          0
+Direct Sales         2000-09  US        638,201          0          0          0
+Internet             2000-10  US        137,054          0          0          0
+Direct Sales         2000-09  GB         85,223          0          0          0
+Internet             2000-09  US        124,224          0          0          0
+Direct Sales         2000-10  GB         91,925          0          0          0
+Internet             2000-10  GB         14,539          0          0          0
+Internet             2000-09  GB         16,569          0          0          0
+Direct Sales         2000-10  US        682,297          0          0          0
+Direct Sales         2000-09  US        638,201          0          0          0
+
+CHANNEL_DESC         CALENDAR CO SALES$                 CH         MO         CO
+-------------------- -------- -- -------------- ---------- ---------- ----------
+Internet             2000-10  US        137,054          0          0          0
+Direct Sales         2000-09  GB         85,223          0          0          0
+Internet             2000-09  US        124,224          0          0          0
+Direct Sales         2000-10  GB         91,925          0          0          0
+Internet             2000-10  GB         14,539          0          0          0
+Internet             2000-09  GB         16,569          0          0          0
+Direct Sales         2000-10  US        682,297          0          0          0
+Direct Sales         2000-09  US        638,201          0          0          0
+Internet             2000-10  US        137,054          0          0          0
+Direct Sales         2000-09  GB         85,223          0          0          0
+Internet             2000-09  US        124,224          0          0          0
+
+CHANNEL_DESC         CALENDAR CO SALES$                 CH         MO         CO
+-------------------- -------- -- -------------- ---------- ---------- ----------
+Direct Sales         2000-10  GB         91,925          0          0          0
+Internet             2000-10  GB         14,539          0          0          0
+
+24 rows selected.
+
+SQL>
+=====================================================================
+Q8. Consider the following Query and make conclusion from the result obtained.
+Query: (scott Schema)
+SELECT deptno, job, SUM(sal)
+FROM emp
+GROUP BY CUBE(deptno, job)
+
+SQL> SELECT deptno, job, SUM(sal)
+  2  FROM emp
+  3  GROUP BY CUBE(deptno, job);
+
+    DEPTNO JOB         SUM(SAL)
+---------- --------- ----------
+                          29025
+           CLERK           4150
+           ANALYST         6000
+           MANAGER         8275
+           SALESMAN        5600
+           PRESIDENT       5000
+        10                 8750
+        10 CLERK           1300
+        10 MANAGER         2450
+        10 PRESIDENT       5000
+        20                10875
+
+    DEPTNO JOB         SUM(SAL)
+---------- --------- ----------
+        20 CLERK           1900
+        20 ANALYST         6000
+        20 MANAGER         2975
+        30                 9400
+        30 CLERK            950
+        30 MANAGER         2850
+        30 SALESMAN        5600
+
+18 rows selected.
+
+SQL>
+===========================================================
+Q9. Calculate the salary for each department present in different cities of hr schema using rollup.
+
+
+select sum(e.salary),d.department_name,l.city
+ from employees e join departments d on e.department_id=d.department_id
+ join locations l on l.location_id=d.location_id
+group by rollup(d.department_name,l.city);
+
+
+SQL>
+SQL> select sum(e.salary),d.department_name,l.city
+  2   from employees e join departments d on e.department_id=d.department_id
+  3   join locations l on l.location_id=d.location_id
+  4  group by rollup(d.department_name,l.city);
+
+SUM(E.SALARY) DEPARTMENT_NAME                CITY
+------------- ------------------------------ ------------------------------
+        28800 IT                             Southlake
+        28800 IT
+       304500 Sales                          Oxford
+       304500 Sales
+        51608 Finance                        Seattle
+        51608 Finance
+       156400 Shipping                       South San Francisco
+       156400 Shipping
+        58000 Executive                      Seattle
+        58000 Executive
+        19000 Marketing                      Toronto
+
+SUM(E.SALARY) DEPARTMENT_NAME                CITY
+------------- ------------------------------ ------------------------------
+        19000 Marketing
+        20308 Accounting                     Seattle
+        20308 Accounting
+        24900 Purchasing                     Seattle
+        24900 Purchasing
+         4400 Administration                 Seattle
+         4400 Administration
+         6500 Human Resources                London
+         6500 Human Resources
+        10000 Public Relations               Munich
+        10000 Public Relations
+
+SUM(E.SALARY) DEPARTMENT_NAME                CITY
+------------- ------------------------------ ------------------------------
+       684416
+
+23 rows selected.
+=======================================================================================================
+
+Q10. Calculate the salary for each department present in different cities of hr schema using cube.
+
+select sum(e.salary),d.department_name,l.city
+ from employees e join departments d on e.department_id=d.department_id
+ join locations l on l.location_id=d.location_id
+group by cube(d.department_name,l.city);
+
+SQL> select sum(e.salary),d.department_name,l.city
+  2   from employees e join departments d on e.department_id=d.department_id
+  3   join locations l on l.location_id=d.location_id
+  4  group by cube(d.department_name,l.city);
+
+SUM(E.SALARY) DEPARTMENT_NAME                CITY
+------------- ------------------------------ ------------------------------
+       684416
+         6500                                London
+        10000                                Munich
+       304500                                Oxford
+       159216                                Seattle
+        19000                                Toronto
+        28800                                Southlake
+       156400                                South San Francisco
+        28800 IT
+        28800 IT                             Southlake
+       304500 Sales
+
+SUM(E.SALARY) DEPARTMENT_NAME                CITY
+------------- ------------------------------ ------------------------------
+       304500 Sales                          Oxford
+        51608 Finance
+        51608 Finance                        Seattle
+       156400 Shipping
+       156400 Shipping                       South San Francisco
+        58000 Executive
+        58000 Executive                      Seattle
+        19000 Marketing
+        19000 Marketing                      Toronto
+        20308 Accounting
+        20308 Accounting                     Seattle
+
+SUM(E.SALARY) DEPARTMENT_NAME                CITY
+------------- ------------------------------ ------------------------------
+        24900 Purchasing
+        24900 Purchasing                     Seattle
+         4400 Administration
+         4400 Administration                 Seattle
+         6500 Human Resources
+         6500 Human Resources                London
+        10000 Public Relations
+        10000 Public Relations               Munich
+
+30 rows selected.
+
+SQL>

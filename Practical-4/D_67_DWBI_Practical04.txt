@@ -1,0 +1,310 @@
+PPRACTICAL NO:04
+
+create table customers_copy_btree as select * from customers
+
+create index cust_gender_index on customers_copy_btree(CUST_GENDER);
+
+create index CUST_YEAR_OF_BIRTH_index on customers_copy_btree(CUST_YEAR_OF_BIRTH);
+
+create index CUST_LAST_NAME_index on customers_copy_btree(CUST_LAST_NAME);
+create index CUST_STREET_ADDRESS_index on customers_copy_btree(CUST_STREET_ADDRESS);
+
+
+create table customers_copy_bitmap as select * from customers
+
+create bitmap index cust_gender1_index on customers_copy_bitmap(CUST_GENDER);
+
+create bitmap index CUST_YEAR_OF_BIRTH1_index on customers_copy_bitmap(CUST_YEAR_OF_BIRTH);
+
+create bitmap index CUST_LAST_NAME1_index on customers_copy_bitmap(CUST_LAST_NAME);
+create bitmap index CUST_STREET_ADDRESS1_index on customers_copy_bitmap(CUST_STREET_ADDRESS);
+
+=========================================================================
+SQL> create table customers_copy_btree as select * from customers;
+
+Table created.
+
+Elapsed: 00:00:03.98
+SQL> desc customers_copy_btree;
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ CUST_ID                                   NOT NULL NUMBER
+ CUST_FIRST_NAME                           NOT NULL VARCHAR2(20)
+ CUST_LAST_NAME                            NOT NULL VARCHAR2(40)
+ CUST_GENDER                               NOT NULL CHAR(1)
+ CUST_YEAR_OF_BIRTH                        NOT NULL NUMBER(4)
+ CUST_MARITAL_STATUS                                VARCHAR2(20)
+ CUST_STREET_ADDRESS                       NOT NULL VARCHAR2(40)
+ CUST_POSTAL_CODE                          NOT NULL VARCHAR2(10)
+ CUST_CITY                                 NOT NULL VARCHAR2(30)
+ CUST_CITY_ID                              NOT NULL NUMBER
+ CUST_STATE_PROVINCE                       NOT NULL VARCHAR2(40)
+ CUST_STATE_PROVINCE_ID                    NOT NULL NUMBER
+ COUNTRY_ID                                NOT NULL NUMBER
+ CUST_MAIN_PHONE_NUMBER                    NOT NULL VARCHAR2(25)
+ CUST_INCOME_LEVEL                                  VARCHAR2(30)
+ CUST_CREDIT_LIMIT                                  NUMBER
+ CUST_EMAIL                                         VARCHAR2(30)
+ CUST_TOTAL                                NOT NULL VARCHAR2(14)
+ CUST_TOTAL_ID                             NOT NULL NUMBER
+ CUST_SRC_ID                                        NUMBER
+ CUST_EFF_FROM                                      DATE
+ CUST_EFF_TO                                        DATE
+ CUST_VALID                                         VARCHAR2(1)
+
+SQL> create index cust_gender_index on customers_copy_btree(CUST_GENDER);
+
+Index created.
+
+Elapsed: 00:00:00.28
+SQL> create index CUST_YEAR_OF_BIRTH_index on customers_copy_btree(CUST_YEAR_OF_BIRTH);
+
+Index created.
+
+Elapsed: 00:00:00.09
+SQL>
+SQL> create index CUST_LAST_NAME_index on customers_copy_btree(CUST_LAST_NAME);
+
+Index created.
+
+Elapsed: 00:00:00.59
+SQL> create index CUST_STREET_ADDRESS_index on customers_copy_btree(CUST_STREET_ADDRESS);
+
+Index created.
+Elapsed: 00:00:00.64
+
+========================================================
+bitmap
+
+SQL> create table customers_copy_bitmap as select * from customers;
+
+Table created.
+
+Elapsed: 00:00:03.27
+
+SQL> create bitmap index cust_gender1_index on customers_copy_bitmap(CUST_GENDER);
+
+Index created.
+
+Elapsed: 00:00:00.32
+SQL>
+SQL> create bitmap index CUST_YEAR_OF_BIRTH1_index on customers_copy_bitmap(CUST_YEAR_OF_BIRTH);
+
+Index created.
+
+Elapsed: 00:00:00.03
+SQL>
+SQL> create bitmap index CUST_LAST_NAME1_index on customers_copy_bitmap(CUST_LAST_NAME);
+
+Index created.
+
+Elapsed: 00:00:00.03
+SQL> create bitmap index CUST_STREET_ADDRESS1_index on customers_copy_bitmap(CUST_STREET_ADDRESS);
+
+Index created.
+
+Elapsed: 00:00:00.60
+SQL>
+
+
+
+
+=====================================================================================
+                                  btree                              bitmap
+====================================================================================
+                      
+cust_gender                    00:00:00.28                        00:00:00.32
+
+cust_year_of_birth             00:00:00.09                        00:00:00.03
+
+cust_last_name                 00:00:00.59                        00:00:00.03
+
+cust_street_address            00:00:00.64                        00:00:00.60
+
+
+
+
+=======================================================================================
+select segment_name
+  ,bytes/1024/1024 "Size in MB"
+  from   user_segments
+  where  segment_name like 'CUSTOMERS_COPY%';
+
+
+
+SEGMENT_NAME
+--------------------------------------------------------------------------------
+Size in MB
+----------
+CUSTOMERS_COPY_BITMAP
+        12
+
+CUSTOMERS_COPY_BTREE
+        12
+
+
+Elapsed: 00:00:00.06
+========================================
+
+function based index
+
+create index indx1 on employees(salary,commission_pct);
+
+select employee_id,first_name,salary,commission_pct from employees where commission_pct <=50000;
+
+
+
+create index indx2 on employees(lower(first_name));
+
+SQL> create index indx1 on employees(salary,commission_pct);
+
+Index created.
+
+Elapsed: 00:00:00.05
+SQL> desc employees;
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ EMPLOYEE_ID                               NOT NULL NUMBER(6)
+ FIRST_NAME                                         VARCHAR2(20)
+ LAST_NAME                                 NOT NULL VARCHAR2(25)
+ EMAIL                                     NOT NULL VARCHAR2(25)
+ PHONE_NUMBER                                       VARCHAR2(20)
+ HIRE_DATE                                 NOT NULL DATE
+ JOB_ID                                    NOT NULL VARCHAR2(10)
+ SALARY                                             NUMBER(8,2)
+ COMMISSION_PCT                                     NUMBER(2,2)
+ MANAGER_ID                                         NUMBER(6)
+ DEPARTMENT_ID                                      NUMBER(4)
+
+
+
+Elapsed: 00:00:00.00
+SQL> select employee_id,first_name from employees where commission_pct <=50000;
+
+EMPLOYEE_ID FIRST_NAME
+----------- --------------------
+        145 John
+        146 Karen
+        147 Alberto
+        148 Gerald
+        149 Eleni
+        150 Peter
+        151 David
+        152 Peter
+        153 Christopher
+        154 Nanette
+        155 Oliver
+
+EMPLOYEE_ID FIRST_NAME
+----------- --------------------
+        156 Janette
+        157 Patrick
+        158 Allan
+        159 Lindsey
+        160 Louise
+        161 Sarath
+        162 Clara
+        163 Danielle
+        164 Mattea
+        165 David
+        166 Sundar
+
+EMPLOYEE_ID FIRST_NAME
+----------- --------------------
+        167 Amit
+        168 Lisa
+        169 Harrison
+        170 Tayler
+        171 William
+        172 Elizabeth
+        173 Sundita
+        174 Ellen
+        175 Alyssa
+        176 Jonathon
+        177 Jack
+
+EMPLOYEE_ID FIRST_NAME
+----------- --------------------
+        178 Kimberely
+        179 Charles
+
+35 rows selected.
+
+Elapsed: 00:00:00.02
+SQL> select employee_id,first_name,salary,commission_pct from employees where commission_pct <=50000;
+
+EMPLOYEE_ID FIRST_NAME               SALARY COMMISSION_PCT
+----------- -------------------- ---------- --------------
+        145 John                      14000             .4
+        146 Karen                     13500             .3
+        147 Alberto                   12000             .3
+        148 Gerald                    11000             .3
+        149 Eleni                     10500             .2
+        150 Peter                     10000             .3
+        151 David                      9500            .25
+        152 Peter                      9000            .25
+        153 Christopher                8000             .2
+        154 Nanette                    7500             .2
+        155 Oliver                     7000            .15
+
+EMPLOYEE_ID FIRST_NAME               SALARY COMMISSION_PCT
+----------- -------------------- ---------- --------------
+        156 Janette                   10000            .35
+        157 Patrick                    9500            .35
+        158 Allan                      9000            .35
+        159 Lindsey                    8000             .3
+        160 Louise                     7500             .3
+        161 Sarath                     7000            .25
+        162 Clara                     10500            .25
+        163 Danielle                   9500            .15
+        164 Mattea                     7200             .1
+        165 David                      6800             .1
+        166 Sundar                     6400             .1
+
+EMPLOYEE_ID FIRST_NAME               SALARY COMMISSION_PCT
+----------- -------------------- ---------- --------------
+        167 Amit                       6200             .1
+        168 Lisa                      11500            .25
+        169 Harrison                  10000             .2
+        170 Tayler                     9600             .2
+        171 William                    7400            .15
+        172 Elizabeth                  7300            .15
+        173 Sundita                    6100             .1
+        174 Ellen                     11000             .3
+        175 Alyssa                     8800            .25
+        176 Jonathon                   8600             .2
+        177 Jack                       8400             .2
+
+EMPLOYEE_ID FIRST_NAME               SALARY COMMISSION_PCT
+----------- -------------------- ---------- --------------
+        178 Kimberely                  7000            .15
+        179 Charles                    6200             .1
+
+35 rows selected.
+
+Elapsed: 00:00:00.04
+SQL>
+SQL> create index indx2 on employees(lower(first_name));
+
+Index created.
+
+Elapsed: 00:00:00.03
+SQL> create index indx3 on employees(upper(first_name));
+
+Index created.
+===========================================================================
+connect SYS AS SYSDBA
+ @?/sqlplus/admin/plustrce.sql
+ grant plustrace to public
+
+
+
+
+=======================================
+create table user_table(userid number,
+username varchar2(25),
+gender char(1));
+============================================
+Insert 10000 records in user table
+
+

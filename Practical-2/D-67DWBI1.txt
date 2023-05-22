@@ -1,0 +1,756 @@
+
+SQL*Plus: Release 11.2.0.1.0 Production on Tue Sep 13 14:21:49 2022
+
+Copyright (c) 1982, 2010, Oracle.  All rights reserved.
+
+Enter user-name: system
+Enter password:
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+SQL> create user ved identified by ved;
+
+User created.
+
+SQL> grant dba to ved;
+
+Grant succeeded.
+
+SQL> create table sales
+  2      (prod_id number(3),
+  3      cust_id number (3),
+  4      promo_id number(3),
+  5      quantity_sold number(3),
+  6      amount_sold number(3),
+  7      sale_date date)
+  8      partition by range(sale_date)
+  9      (partition q1 values less than (to_date('01-04-2022', 'dd-mm-yyyy')),
+ 10     partition q2 values less than (to_date('01-07-2022', 'dd-mm-yyyy')),
+ 11     partition q3 values less than (to_date('01-10-2022', 'dd-mm-yyyy')),
+ 12     partition q4 values less than (to_date('01-01-2023', 'dd-mm-yyyy')));
+
+Table created.
+
+SQL> insert into sales values(&prod_id,&cust_id,&promo_id,&quantity_sold,&amount_sold,&sale_date);
+Enter value for prod_id: 1
+Enter value for cust_id: 1
+Enter value for promo_id: 23
+Enter value for quantity_sold: 45
+Enter value for amount_sold: 33
+Enter value for sale_date: 02-04-1992
+old   1: insert into sales values(&prod_id,&cust_id,&promo_id,&quantity_sold,&amount_sold,&sale_date)
+new   1: insert into sales values(1,1,23,45,33,02-04-1992)
+insert into sales values(1,1,23,45,33,02-04-1992)
+                                           *
+ERROR at line 1:
+ORA-00932: inconsistent datatypes: expected DATE got NUMBER
+
+
+SQL> /
+Enter value for prod_id: 1
+Enter value for cust_id: 1
+Enter value for promo_id: 23
+Enter value for quantity_sold: 45
+Enter value for amount_sold: 33
+Enter value for sale_date: '02-04-1992'
+old   1: insert into sales values(&prod_id,&cust_id,&promo_id,&quantity_sold,&amount_sold,&sale_date)
+new   1: insert into sales values(1,1,23,45,33,'02-04-1992')
+insert into sales values(1,1,23,45,33,'02-04-1992')
+                                      *
+ERROR at line 1:
+ORA-01843: not a valid month
+
+
+SQL> /
+Enter value for prod_id: 1
+Enter value for cust_id: 1
+Enter value for promo_id: 23
+Enter value for quantity_sold: 45
+Enter value for amount_sold: 33
+Enter value for sale_date: '02-03-2008'
+old   1: insert into sales values(&prod_id,&cust_id,&promo_id,&quantity_sold,&amount_sold,&sale_date)
+new   1: insert into sales values(1,1,23,45,33,'02-03-2008')
+insert into sales values(1,1,23,45,33,'02-03-2008')
+                                      *
+ERROR at line 1:
+ORA-01843: not a valid month
+
+
+SQL> /
+Enter value for prod_id: 1
+Enter value for cust_id: 1
+Enter value for promo_id: 23
+Enter value for quantity_sold: 45
+Enter value for amount_sold: 33
+Enter value for sale_date: '02-june-1998'
+old   1: insert into sales values(&prod_id,&cust_id,&promo_id,&quantity_sold,&amount_sold,&sale_date)
+new   1: insert into sales values(1,1,23,45,33,'02-june-1998')
+
+1 row created.
+
+SQL> /
+Enter value for prod_id: 2
+Enter value for cust_id: 2
+Enter value for promo_id: 54
+Enter value for quantity_sold: 22
+Enter value for amount_sold: '01-august-2002'
+Enter value for sale_date: /
+old   1: insert into sales values(&prod_id,&cust_id,&promo_id,&quantity_sold,&amount_sold,&sale_date)
+new   1: insert into sales values(2,2,54,22,'01-august-2002',/)
+insert into sales values(2,2,54,22,'01-august-2002',/)
+                                                    *
+ERROR at line 1:
+ORA-00936: missing expression
+
+
+SQL> /
+Enter value for prod_id: 2
+Enter value for cust_id: 2
+Enter value for promo_id: 54
+Enter value for quantity_sold: 22
+Enter value for amount_sold: 33
+Enter value for sale_date: '01-august-2003'
+old   1: insert into sales values(&prod_id,&cust_id,&promo_id,&quantity_sold,&amount_sold,&sale_date)
+new   1: insert into sales values(2,2,54,22,33,'01-august-2003')
+
+1 row created.
+
+SQL> /
+Enter value for prod_id: 3
+Enter value for cust_id: 3
+Enter value for promo_id: 77
+Enter value for quantity_sold: 55
+Enter value for amount_sold: 12
+Enter value for sale_date: '03-september-2019'
+old   1: insert into sales values(&prod_id,&cust_id,&promo_id,&quantity_sold,&amount_sold,&sale_date)
+new   1: insert into sales values(3,3,77,55,12,'03-september-2019')
+
+1 row created.
+
+SQL> select * from sales partition(q1);
+
+   PROD_ID    CUST_ID   PROMO_ID QUANTITY_SOLD AMOUNT_SOLD SALE_DATE
+---------- ---------- ---------- ------------- ----------- ---------
+         1          1         23            45          33 02-JUN-98
+         2          2         54            22          33 01-AUG-03
+         3          3         77            55          12 03-SEP-19
+
+SQL> insert into sales values(&prod_id,&cust_id,&promo_id,&quantity_sold,&amount_sold,&sale_date);
+Enter value for prod_id: 4
+Enter value for cust_id: 4
+Enter value for promo_id: 99
+Enter value for quantity_sold: 100
+Enter value for amount_sold: 32
+Enter value for sale_date: '21-january-2003'
+old   1: insert into sales values(&prod_id,&cust_id,&promo_id,&quantity_sold,&amount_sold,&sale_date)
+new   1: insert into sales values(4,4,99,100,32,'21-january-2003')
+
+1 row created.
+
+SQL> /
+Enter value for prod_id: 5
+Enter value for cust_id: 5
+Enter value for promo_id: 45
+Enter value for quantity_sold: 44
+Enter value for amount_sold: 55
+Enter value for sale_date: '22-september-2020'
+old   1: insert into sales values(&prod_id,&cust_id,&promo_id,&quantity_sold,&amount_sold,&sale_date)
+new   1: insert into sales values(5,5,45,44,55,'22-september-2020')
+
+1 row created.
+
+SQL> /
+Enter value for prod_id: 6
+Enter value for cust_id: 6
+Enter value for promo_id: 88
+Enter value for quantity_sold: 555
+Enter value for amount_sold: 99
+Enter value for sale_date: '03-september-2021'
+old   1: insert into sales values(&prod_id,&cust_id,&promo_id,&quantity_sold,&amount_sold,&sale_date)
+new   1: insert into sales values(6,6,88,555,99,'03-september-2021')
+
+1 row created.
+
+SQL> select * from sales partition(q2);
+
+no rows selected
+
+SQL> select * from sales partition(q3);
+
+no rows selected
+
+SQL> select * from sales partition(q4);
+
+no rows selected
+
+SQL> select * from sales partition(q1);
+
+   PROD_ID    CUST_ID   PROMO_ID QUANTITY_SOLD AMOUNT_SOLD SALE_DATE
+---------- ---------- ---------- ------------- ----------- ---------
+         1          1         23            45          33 02-JUN-98
+         2          2         54            22          33 01-AUG-03
+         3          3         77            55          12 03-SEP-19
+         4          4         99           100          32 21-JAN-03
+         5          5         45            44          55 22-SEP-20
+         6          6         88           555          99 03-SEP-21
+
+6 rows selected.
+
+SQL> /
+
+   PROD_ID    CUST_ID   PROMO_ID QUANTITY_SOLD AMOUNT_SOLD SALE_DATE
+---------- ---------- ---------- ------------- ----------- ---------
+         1          1         23            45          33 02-JUN-98
+         2          2         54            22          33 01-AUG-03
+         3          3         77            55          12 03-SEP-19
+         4          4         99           100          32 21-JAN-03
+         5          5         45            44          55 22-SEP-20
+         6          6         88           555          99 03-SEP-21
+
+6 rows selected.
+
+SQL> insert into sales values(&prod_id,&cust_id,&promo_id,&quantity_sold,&amount_sold,&sale_date);
+Enter value for prod_id: 7
+Enter value for cust_id: 7
+Enter value for promo_id: 4
+Enter value for quantity_sold: 4
+Enter value for amount_sold: 4
+Enter value for sale_date: '01-june-2022'
+old   1: insert into sales values(&prod_id,&cust_id,&promo_id,&quantity_sold,&amount_sold,&sale_date)
+new   1: insert into sales values(7,7,4,4,4,'01-june-2022')
+
+1 row created.
+
+SQL> select * from sales partition(q2);
+
+   PROD_ID    CUST_ID   PROMO_ID QUANTITY_SOLD AMOUNT_SOLD SALE_DATE
+---------- ---------- ---------- ------------- ----------- ---------
+         7          7          4             4           4 01-JUN-22
+
+SQL> insert into sales values(&prod_id,&cust_id,&promo_id,&quantity_sold,&amount_sold,&sale_date);
+Enter value for prod_id: 8
+Enter value for cust_id: 8
+Enter value for promo_id: 8
+Enter value for quantity_sold: 8
+Enter value for amount_sold: '01-september-2022'
+Enter value for sale_date: /
+old   1: insert into sales values(&prod_id,&cust_id,&promo_id,&quantity_sold,&amount_sold,&sale_date)
+new   1: insert into sales values(8,8,8,8,'01-september-2022',/)
+insert into sales values(8,8,8,8,'01-september-2022',/)
+                                                     *
+ERROR at line 1:
+ORA-00936: missing expression
+
+
+SQL> insert into sales values(&prod_id,&cust_id,&promo_id,&quantity_sold,&amount_sold,&sale_date);
+Enter value for prod_id: 8
+Enter value for cust_id: 8
+Enter value for promo_id: 8
+Enter value for quantity_sold: 8
+Enter value for amount_sold: 8
+Enter value for sale_date: '01-september-2022'
+old   1: insert into sales values(&prod_id,&cust_id,&promo_id,&quantity_sold,&amount_sold,&sale_date)
+new   1: insert into sales values(8,8,8,8,8,'01-september-2022')
+
+1 row created.
+
+SQL> select * from sales partition(q3);
+
+   PROD_ID    CUST_ID   PROMO_ID QUANTITY_SOLD AMOUNT_SOLD SALE_DATE
+---------- ---------- ---------- ------------- ----------- ---------
+         8          8          8             8           8 01-SEP-22
+
+
+SQL> alter table sales ENABLE ROW MOVEMENT;
+
+Table altered.
+
+SQL> update sales set sale_date='01-october-2022' where cust_id=8;
+
+1 row updated.
+
+SQL> SELECT * FROM SALES PARTITION(P1);
+SELECT * FROM SALES PARTITION(P1)
+                              *
+ERROR at line 1:
+ORA-02149: Specified partition does not exist
+
+
+SQL> SELECT * FROM SALES PARTITION(p1);
+SELECT * FROM SALES PARTITION(p1)
+                              *
+ERROR at line 1:
+ORA-02149: Specified partition does not exist
+
+
+SQL> select * from sales partition(q1);
+
+   PROD_ID    CUST_ID   PROMO_ID QUANTITY_SOLD AMOUNT_SOLD SALE_DATE
+---------- ---------- ---------- ------------- ----------- ---------
+         1          1         23            45          33 02-JUN-98
+         2          2         54            22          33 01-AUG-03
+         3          3         77            55          12 03-SEP-19
+         4          4         99           100          32 21-JAN-03
+         5          5         45            44          55 22-SEP-20
+         6          6         88           555          99 03-SEP-21
+
+6 rows selected.
+
+SQL> select * from sales partition(q2);
+
+   PROD_ID    CUST_ID   PROMO_ID QUANTITY_SOLD AMOUNT_SOLD SALE_DATE
+---------- ---------- ---------- ------------- ----------- ---------
+         7          7          4             4           4 01-JUN-22
+
+SQL> select * from sales partition(q3);
+
+no rows selected
+
+SQL> select * from sales partition(q4);
+
+   PROD_ID    CUST_ID   PROMO_ID QUANTITY_SOLD AMOUNT_SOLD SALE_DATE
+---------- ---------- ---------- ------------- ----------- ---------
+         8          8          8             8           8 01-OCT-22
+
+SQL> create table list
+  2  (deptno number(2),
+  3  deptname varchar2(25),
+  4  quarterly_sales number(3),
+  5  state varchar2(20));
+
+Table created.
+
+SQL> drop table list;
+
+Table dropped.
+
+SQL> create table list
+  2      (deptno number(2),
+  3      deptname varchar2(25),
+  4      quarterly_sales number(3),
+  5      state varchar2(20))
+  6  partition by list(state)
+  7  (partition p1 values ('OR','WA'),
+  8  partition p2 values ('AZ','UT','NM'),
+  9  partition p3 values ('NY','VM','NJ'),
+ 10  partition p4 values ('FL','GA'),
+ 11  partition p5 values ('SD','WI'),
+ 12  partition p6 values ('OK','TX'));
+
+Table created.
+
+SQL> INSERT INTO LIST VALUES(&deptno,'&deptname',&quarterly_sales,'&state');
+Enter value for deptno: 10
+Enter value for deptname: 'accounting'
+Enter value for quarterly_sales: 100
+Enter value for state: '
+old   1: INSERT INTO LIST VALUES(&deptno,'&deptname',&quarterly_sales,'&state')
+new   1: INSERT INTO LIST VALUES(10,''accounting'',100,''')
+ERROR:
+ORA-01756: quoted string not properly terminated
+
+
+SQL> /
+Enter value for deptno: 10
+Enter value for deptname: accounting
+Enter value for quarterly_sales: 100
+Enter value for state: WA
+old   1: INSERT INTO LIST VALUES(&deptno,'&deptname',&quarterly_sales,'&state')
+new   1: INSERT INTO LIST VALUES(10,'accounting',100,'WA')
+
+1 row created.
+
+SQL> /
+Enter value for deptno: 20
+Enter value for deptname: R&D
+Enter value for quarterly_sales: 150
+Enter value for state: OR
+old   1: INSERT INTO LIST VALUES(&deptno,'&deptname',&quarterly_sales,'&state')
+new   1: INSERT INTO LIST VALUES(20,'R&D',150,'OR')
+
+1 row created.
+
+SQL> /
+Enter value for deptno: 30
+Enter value for deptname: SALES
+Enter value for quarterly_sales: 100
+Enter value for state: FL
+old   1: INSERT INTO LIST VALUES(&deptno,'&deptname',&quarterly_sales,'&state')
+new   1: INSERT INTO LIST VALUES(30,'SALES',100,'FL')
+
+1 row created.
+
+SQL> /
+Enter value for deptno: 40
+Enter value for deptname: HR
+Enter value for quarterly_sales: 10
+Enter value for state: TX
+old   1: INSERT INTO LIST VALUES(&deptno,'&deptname',&quarterly_sales,'&state')
+new   1: INSERT INTO LIST VALUES(40,'HR',10,'TX')
+
+1 row created.
+
+SQL> /
+Enter value for deptno: 50
+Enter value for deptname: SYSTEMS ENGINEERING
+Enter value for quarterly_sales: 10
+Enter value for state: CA
+old   1: INSERT INTO LIST VALUES(&deptno,'&deptname',&quarterly_sales,'&state')
+new   1: INSERT INTO LIST VALUES(50,'SYSTEMS ENGINEERING',10,'CA')
+INSERT INTO LIST VALUES(50,'SYSTEMS ENGINEERING',10,'CA')
+            *
+ERROR at line 1:
+ORA-14400: inserted partition key does not map to any partition
+
+
+SQL> ALTER TABLE LIST ADD PARTITION P7 VALUES('CA');
+
+Table altered.
+
+SQL> /
+ALTER TABLE LIST ADD PARTITION P7 VALUES('CA')
+            *
+ERROR at line 1:
+ORA-14312: Value 'CA' already exists in partition 7
+
+
+SQL> SELECT * FROM LIST PARTITION(P7);
+
+no rows selected
+
+SQL> INSERT INTO LIST VALUES(&deptno,'&deptname',&quarterly_sales,'&state');
+Enter value for deptno: 50
+Enter value for deptname: SYSTEMSENGINEERING
+Enter value for quarterly_sales: 10
+Enter value for state: CA
+old   1: INSERT INTO LIST VALUES(&deptno,'&deptname',&quarterly_sales,'&state')
+new   1: INSERT INTO LIST VALUES(50,'SYSTEMSENGINEERING',10,'CA')
+
+1 row created.
+
+SQL> SELECT * FROM LIST PARTITION(P7);
+
+    DEPTNO DEPTNAME                  QUARTERLY_SALES STATE
+---------- ------------------------- --------------- --------------------
+        50 SYSTEMSENGINEERING                     10 CA
+
+SQL> CREATE TABLE DEMO(
+  2  year number,
+  3  month number,
+  4  day number,
+  5  amount_sold number)
+  6  parti/
+  7
+SQL> CREATE TABLE sales_demo (
+  2     year          NUMBER,
+  3     month         NUMBER,
+  4     day           NUMBER,
+  5     amount_sold   NUMBER)
+  6  PARTITION BY RANGE (year,month)
+  7    (PARTITION before2001 VALUES LESS THAN (2001,1),
+  8     PARTITION q1_2001    VALUES LESS THAN (2001,4),
+  9     PARTITION q2_2001    VALUES LESS THAN (2001,7),
+ 10     PARTITION q3_2001    VALUES LESS THAN (2001,10),
+ 11     PARTITION q4_2001    VALUES LESS THAN (2002,1),
+ 12     PARTITION future     VALUES LESS THAN (MAXVALUE,0));
+
+Table created.
+
+SQL> insert into sales_demo(2000,12,12,1000);
+insert into sales_demo(2000,12,12,1000)
+                       *
+ERROR at line 1:
+ORA-00928: missing SELECT keyword
+
+
+SQL> insert into sales_demo values(&year,&month,&day,&amount_sold);
+Enter value for year: 2000
+Enter value for month: 12
+Enter value for day: 12
+Enter value for amount_sold: 1000
+old   1: insert into sales_demo values(&year,&month,&day,&amount_sold)
+new   1: insert into sales_demo values(2000,12,12,1000)
+
+1 row created.
+
+SQL> /
+Enter value for year: 2001
+Enter value for month: 2
+Enter value for day: /
+Enter value for amount_sold: /
+old   1: insert into sales_demo values(&year,&month,&day,&amount_sold)
+new   1: insert into sales_demo values(2001,2,/,/)
+insert into sales_demo values(2001,2,/,/)
+                                     *
+ERROR at line 1:
+ORA-00936: missing expression
+
+
+SQL> /
+Enter value for year: 2001
+Enter value for month: 3
+Enter value for day: 17
+Enter value for amount_sold: 2000
+old   1: insert into sales_demo values(&year,&month,&day,&amount_sold)
+new   1: insert into sales_demo values(2001,3,17,2000)
+
+1 row created.
+
+SQL> /
+Enter value for year: 2001
+Enter value for month: 11
+Enter value for day: 1
+Enter value for amount_sold: 5000
+old   1: insert into sales_demo values(&year,&month,&day,&amount_sold)
+new   1: insert into sales_demo values(2001,11,1,5000)
+
+1 row created.
+
+SQL> /
+Enter value for year: 2002
+Enter value for month: 1
+Enter value for day: 1
+Enter value for amount_sold: 4000
+old   1: insert into sales_demo values(&year,&month,&day,&amount_sold)
+new   1: insert into sales_demo values(2002,1,1,4000)
+
+1 row created.
+
+SQL> select * from sales_demo partition(q1_2001);
+
+      YEAR      MONTH        DAY AMOUNT_SOLD
+---------- ---------- ---------- -----------
+      2001          3         17        2000
+
+SQL> select * from sales_demo partition(q2_2001);
+
+no rows selected
+
+SQL> select * from sales_demo partition(q3_2001);
+
+no rows selected
+
+SQL> select * from sales_demo partition(before2001);
+
+      YEAR      MONTH        DAY AMOUNT_SOLD
+---------- ---------- ---------- -----------
+      2000         12         12        1000
+
+SQL> select * from sales_demo partition(future);
+
+      YEAR      MONTH        DAY AMOUNT_SOLD
+---------- ---------- ---------- -----------
+      2002          1          1        4000
+
+SQL> select * from sales_demo;
+
+      YEAR      MONTH        DAY AMOUNT_SOLD
+---------- ---------- ---------- -----------
+      2000         12         12        1000
+      2001          3         17        2000
+      2001         11          1        5000
+      2002          1          1        4000
+
+SQL> select * from sales_demo partition(q4_2001);
+
+      YEAR      MONTH        DAY AMOUNT_SOLD
+---------- ---------- ---------- -----------
+      2001         11          1        5000
+
+SQL> CREATE TABLE SUPPLIER(
+  2  /
+CREATE TABLE SUPPLIER(
+                     *
+ERROR at line 1:
+ORA-00904: : invalid identifier
+
+
+SQL> CREATE TABLE supplier(
+  2  supplier_id number,
+  3  partnum number,
+  4  price number)
+  5  partition by range(supplier_id,partnum)
+  6  (partition p1 values less than (10,100),
+  7  partition p2 values less than (10,200),
+  8  partition p3 values less than (maxvalue,maxvalue));
+
+Table created.
+
+SQL> insert into supplier values(&supplier_id,&partnum,&price);
+Enter value for supplier_id: 5
+Enter value for partnum: 5
+Enter value for price: 1000
+old   1: insert into supplier values(&supplier_id,&partnum,&price)
+new   1: insert into supplier values(5,5,1000)
+
+1 row created.
+
+SQL> /
+Enter value for supplier_id: 5
+Enter value for partnum: 150
+Enter value for price: 1000
+old   1: insert into supplier values(&supplier_id,&partnum,&price)
+new   1: insert into supplier values(5,150,1000)
+
+1 row created.
+
+SQL> /
+Enter value for supplier_id: 10
+Enter value for partnum: 100
+Enter value for price: 1000
+old   1: insert into supplier values(&supplier_id,&partnum,&price)
+new   1: insert into supplier values(10,100,1000)
+
+1 row created.
+
+SQL> select * from supplier partition(p1);
+
+SUPPLIER_ID    PARTNUM      PRICE
+----------- ---------- ----------
+          5          5       1000
+          5        150       1000
+
+SQL> select * from supplier partition(p2);
+
+SUPPLIER_ID    PARTNUM      PRICE
+----------- ---------- ----------
+         10        100       1000
+
+SQL> select * from supplier partition(p3);
+
+no rows selected
+
+SQL> alter table partition p2 values less than (5,200);
+alter table partition p2 values less than (5,200)
+                      *
+ERROR at line 1:
+ORA-01735: invalid ALTER TABLE option
+
+
+SQL> alter table supplier enable row movement;
+
+Table altered.
+
+
+SQL> drop table supplier;
+
+Table dropped.
+
+SQL> CREATE TABLE supplier(
+  2      supplier_id number,
+  3      partnum number,
+  4      price number)
+  5      partition by range(supplier_id,partnum)
+  6      (partition p1 values less than (6,6),
+  7      partition p2 values less than (9,200),
+  8      partition p3 values less than (1111,1111));
+
+Table created.
+
+SQL> insert into supplier values(&supplier_id,&partnum,&price);
+Enter value for supplier_id: 5
+Enter value for partnum: 5
+Enter value for price: 1000
+old   1: insert into supplier values(&supplier_id,&partnum,&price)
+new   1: insert into supplier values(5,5,1000)
+
+1 row created.
+
+SQL> /
+Enter value for supplier_id: 5
+Enter value for partnum: 150
+Enter value for price: 1000
+old   1: insert into supplier values(&supplier_id,&partnum,&price)
+new   1: insert into supplier values(5,150,1000)
+
+1 row created.
+
+SQL> /
+Enter value for supplier_id: 10
+Enter value for partnum: 100
+Enter value for price: 1000
+old   1: insert into supplier values(&supplier_id,&partnum,&price)
+new   1: insert into supplier values(10,100,1000)
+
+1 row created.
+
+SQL> select * from supplier partition(p1);
+
+SUPPLIER_ID    PARTNUM      PRICE
+----------- ---------- ----------
+          5          5       1000
+          5        150       1000
+
+SQL> select * from supplier partition(p2);
+
+no rows selected
+
+SQL> select * from supplier partition(p3);
+
+SUPPLIER_ID    PARTNUM      PRICE
+----------- ---------- ----------
+         10        100       1000
+
+SQL> drop table supplier;
+
+Table dropped.
+
+SQL> CREATE TABLE supplier(
+  2      supplier_id number,
+  3      partnum number,
+  4      price number)
+  5      partition by range(supplier_id,partnum)
+  6      (partition p1 values less than (5,100),
+  7      partition p2 values less than (5,160),
+  8      partition p3 values less than (1100,1100));
+
+Table created.
+
+SQL> insert into supplier values(&supplier_id,&partnum,&price);
+Enter value for supplier_id: 5
+Enter value for partnum: 5
+Enter value for price: 1000
+old   1: insert into supplier values(&supplier_id,&partnum,&price)
+new   1: insert into supplier values(5,5,1000)
+
+1 row created.
+
+SQL> /
+Enter value for supplier_id: 5
+Enter value for partnum: 150
+Enter value for price: 1000
+old   1: insert into supplier values(&supplier_id,&partnum,&price)
+new   1: insert into supplier values(5,150,1000)
+
+1 row created.
+
+SQL> /
+Enter value for supplier_id: 10
+Enter value for partnum: 100
+Enter value for price: 1000
+old   1: insert into supplier values(&supplier_id,&partnum,&price)
+new   1: insert into supplier values(10,100,1000)
+
+1 row created.
+
+SQL> select * from supplier partition(p1);
+
+SUPPLIER_ID    PARTNUM      PRICE
+----------- ---------- ----------
+          5          5       1000
+
+SQL> select * from supplier partition(p2);
+
+SUPPLIER_ID    PARTNUM      PRICE
+----------- ---------- ----------
+          5        150       1000
+
+SQL> select * from supplier partition(p3);
+
+SUPPLIER_ID    PARTNUM      PRICE
+----------- ---------- ----------
+         10        100       1000
+
+SQL>
